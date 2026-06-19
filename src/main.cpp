@@ -17,6 +17,51 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
 
+// Vertices used for light cube
+    float vertices[] = {
+        -0.5f, -0.5f, -0.5f, 
+         0.5f, -0.5f, -0.5f,  
+         0.5f,  0.5f, -0.5f,  
+         0.5f,  0.5f, -0.5f,  
+        -0.5f,  0.5f, -0.5f, 
+        -0.5f, -0.5f, -0.5f, 
+
+        -0.5f, -0.5f,  0.5f, 
+         0.5f, -0.5f,  0.5f,  
+         0.5f,  0.5f,  0.5f,  
+         0.5f,  0.5f,  0.5f,  
+        -0.5f,  0.5f,  0.5f, 
+        -0.5f, -0.5f,  0.5f, 
+
+        -0.5f,  0.5f,  0.5f, 
+        -0.5f,  0.5f, -0.5f, 
+        -0.5f, -0.5f, -0.5f, 
+        -0.5f, -0.5f, -0.5f, 
+        -0.5f, -0.5f,  0.5f, 
+        -0.5f,  0.5f,  0.5f, 
+
+         0.5f,  0.5f,  0.5f,  
+         0.5f,  0.5f, -0.5f,  
+         0.5f, -0.5f, -0.5f,  
+         0.5f, -0.5f, -0.5f,  
+         0.5f, -0.5f,  0.5f,  
+         0.5f,  0.5f,  0.5f,  
+
+        -0.5f, -0.5f, -0.5f, 
+         0.5f, -0.5f, -0.5f,  
+         0.5f, -0.5f,  0.5f,  
+         0.5f, -0.5f,  0.5f,  
+        -0.5f, -0.5f,  0.5f, 
+        -0.5f, -0.5f, -0.5f, 
+
+        -0.5f,  0.5f, -0.5f, 
+         0.5f,  0.5f, -0.5f,  
+         0.5f,  0.5f,  0.5f,  
+         0.5f,  0.5f,  0.5f,  
+        -0.5f,  0.5f,  0.5f, 
+        -0.5f,  0.5f, -0.5f, 
+    };
+
 const int SCR_WIDTH = 800;
 const int SCR_HEIGHT = 600;
 
@@ -63,6 +108,16 @@ int main(int argc, char* argv[]) {
     stbi_set_flip_vertically_on_load(true);
 
     Shader shader("src/shader.vert", "src/shader.frag");
+    Shader lightSourceShader("src/lightSource.vert", "src/lightSource.frag");
+
+    glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
+
+    VertexBuffer lightVBO(vertices, sizeof(vertices));
+    VertexArray lightVAO;
+    lightVAO.bind();
+    lightVBO.bind();
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
 
     Model teapot("textures/teapot/utah_teapot.obj");
     Model backpack("textures/backpack/backpack.obj");
@@ -105,6 +160,18 @@ int main(int argc, char* argv[]) {
         shader.setMat4("model", teapotModelMat);
 
         teapot.Draw(shader);
+
+        // Draw light cube
+        glm::mat4 lightModelMat = glm::mat4(1.0f);
+        lightModelMat = glm::translate(lightModelMat, lightPos);
+        lightModelMat = glm::scale(lightModelMat, glm::vec3(0.2f));
+
+        lightSourceShader.use();
+        lightSourceShader.setMat4("projection", projection);
+        lightSourceShader.setMat4("view", view);
+        lightSourceShader.setMat4("model", lightModelMat);
+        lightVAO.bind();
+        glDrawArrays(GL_TRIANGLES, 0, 36);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
