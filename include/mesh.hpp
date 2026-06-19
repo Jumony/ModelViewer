@@ -80,8 +80,8 @@ namespace Mesh {
     }
 
     void Mesh::Draw(Shader& shader) {
-        uint32_t diffuseNr = 1;
-        uint32_t specularNr = 1;
+        uint32_t diffuseNr = 0;
+        uint32_t specularNr = 0;
 
         for (uint32_t i = 0; i < textures.size(); i++) {
             glActiveTexture(GL_TEXTURE0 + i);
@@ -94,9 +94,13 @@ namespace Mesh {
                 number = std::to_string(specularNr++);
             }
 
-            shader.setInt(("material." + name + number).c_str(), i);
+            shader.setInt((name + '[' + number + ']').c_str(), i);
             glBindTexture(GL_TEXTURE_2D, textures[i].id);
         }
+
+        shader.setInt("diffuseCount", diffuseNr);
+        shader.setInt("specularCount", specularNr);
+        
         glActiveTexture(GL_TEXTURE0);
 
         glBindVertexArray(VAO);
