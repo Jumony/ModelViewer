@@ -152,6 +152,7 @@ int main(int argc, char* argv[]) {
         shader.setMat4("projection", projection);
         shader.setMat4("view", view);
         shader.setMat4("model", backpackModelMat);
+        shader.setVec3("lightColor", glm::vec3(1.0f));
 
         backpack.Draw(shader);
 
@@ -170,6 +171,7 @@ int main(int argc, char* argv[]) {
         lightSourceShader.setMat4("projection", projection);
         lightSourceShader.setMat4("view", view);
         lightSourceShader.setMat4("model", lightModelMat);
+        lightSourceShader.setVec3("lightPos", lightPos);
         lightVAO.bind();
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
