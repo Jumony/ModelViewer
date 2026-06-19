@@ -1,0 +1,15 @@
+# build outputs
+build/
+cmake-build-*/
+*.exe
+*.dll
+*.a
+*.o
+*.obj
+
+# runtime junk
+out.txt
+
+# IDE
+.vscode/
+.idea/
