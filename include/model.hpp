@@ -50,7 +50,7 @@ Model::Model(const char* path) {
 
 void Model::loadModel(std::string path) {
     Assimp::Importer importer;
-    const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
+    const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
 
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
         std::cout << "ERROR::ASSIMP::" << importer.GetErrorString() << std::endl;
@@ -114,6 +114,24 @@ Mesh::Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
             vertex.TexCoords = glm::vec2(0.0f, 0.0f);
         }
 
+        if (mesh->mTangents && mesh->mBitangents) {
+            vertex.Tangent = glm::vec3(
+                mesh->mTangents[i].x,
+                mesh->mTangents[i].y,
+                mesh->mTangents[i].z
+            );
+
+            vertex.Bitangent = glm::vec3(
+                mesh->mBitangents[i].x,
+                mesh->mBitangents[i].y,
+                mesh->mBitangents[i].z
+            );
+        }     
+        else {
+            vertex.Tangent = glm::vec3(0.0f);
+            vertex.Bitangent = glm::vec3(0.0f);
+        }   
+
         vertices.push_back(vertex);
     }
 
@@ -130,6 +148,9 @@ Mesh::Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
         textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
         std::vector<Mesh::Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
         textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
+        // Assimp exports bump maps as height maps, even when the image is actually a tangent-space normal map
+        std::vector<Mesh::Texture> normalMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, "texture_normal");
+        textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
     }
 
     return Mesh::Mesh(vertices, indices, textures);

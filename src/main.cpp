@@ -136,6 +136,7 @@ int main(void) {
     Model backpack("textures/backpack/backpack.obj");
 
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_FRAMEBUFFER_SRGB);
 
     // rendering loop
     while (!glfwWindowShouldClose(window)) {

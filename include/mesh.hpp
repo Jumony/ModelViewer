@@ -21,6 +21,8 @@ namespace Mesh {
         glm::vec3 Position;
         glm::vec3 Normal;
         glm::vec2 TexCoords;
+        glm::vec3 Tangent;
+        glm::vec3 Bitangent;
     };
 
     struct Texture {
@@ -76,12 +78,19 @@ namespace Mesh {
         glEnableVertexAttribArray(2);
         glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, TexCoords));
 
+        glEnableVertexAttribArray(3);
+        glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Tangent));
+
+        glEnableVertexAttribArray(4);
+        glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Bitangent));
+
         glBindVertexArray(0);
     }
 
     void Mesh::Draw(Shader& shader) {
         uint32_t diffuseNr = 0;
         uint32_t specularNr = 0;
+        uint32_t normalNr = 0;
 
         for (uint32_t i = 0; i < textures.size(); i++) {
             glActiveTexture(GL_TEXTURE0 + i);
@@ -93,6 +102,9 @@ namespace Mesh {
             else if (name == "texture_specular") {
                 number = std::to_string(specularNr++);
             }
+            else if (name == "texture_normal") {
+                number = std::to_string(normalNr++);
+            }
 
             shader.setInt((name + '[' + number + ']').c_str(), i);
             glBindTexture(GL_TEXTURE_2D, textures[i].id);
@@ -100,6 +112,7 @@ namespace Mesh {
 
         shader.setInt("diffuseCount", diffuseNr);
         shader.setInt("specularCount", specularNr);
+        shader.setInt("normalCount", normalNr);
         
         glActiveTexture(GL_TEXTURE0);
 
